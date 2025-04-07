@@ -1,0 +1,17 @@
+name: Create EKS Cluster
+on:
+  workflow_dispatch:
+jobs:
+  create-cluster:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform configuration
+        run: terraform apply -auto-approve
+
+      
