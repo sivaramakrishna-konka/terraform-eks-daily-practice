@@ -37,3 +37,19 @@ variable "vpc_cidr" {
   description = "value of the VPC CIDR block"
   type        = string
 }
+
+#########################################################################
+# Subnet Variables
+#########################################################################
+variable "public_subnet_cidr" {
+  description = "CIDR block for the public subnet"
+  type        = list(string)
+}
+variable "azs" {
+  description = "List of availability zones for the subnets"
+  type        = list(string)
+}
+variable "private_subnet_cidr" {
+  description = "CIDR block for the private subnet"
+  type        = list(string)
+}
