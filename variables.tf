@@ -2,14 +2,14 @@
 # Provider Variables
 ##################################################################################
 variable "region" {
-    description = "The AWS region to deploy the VPC"
-    type        = string
-    default     = "ap-souht-1"
+  description = "The AWS region to deploy the VPC"
+  type        = string
+  default     = "ap-south-1"
 }
 variable "profile" {
-    description = "The AWS profile to use for authentication"
-    type        = string
-    default = "eks-siva.bapatlas.site"
+  description = "The AWS profile to use for authentication"
+  type        = string
+  default     = "eks-siva.bapatlas.site"
 }
 
 ###################################################################################
