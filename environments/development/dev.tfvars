@@ -1,9 +1,12 @@
-environment = "development"
+environment = "dev"
 project     = "eks"
 common_tags = {
   "Environment" = "development"
   "Project"     = "eks"
   "Owner"       = "sivaramakrishna"
+  "Terraform"   = "v1.11.3"
+  "ManagedBy"   = "Terraform"
+  "AWS Version" = "5.94.1"
 }
 vpc_cidr = "10.1.0.0/16"
 

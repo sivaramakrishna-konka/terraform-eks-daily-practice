@@ -79,3 +79,97 @@ resource "aws_db_subnet_group" "default" {
     var.common_tags
     )
 }
+
+################################################################################
+# Route Tables
+################################################################################
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    {
+      Name = "${local.name}-public"
+    },
+    var.common_tags
+    )
+}
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    {
+      Name = "${local.name}-private"
+    },
+    var.common_tags
+    )
+}
+resource "aws_route_table" "db" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    {
+      Name = "${local.name}-db"
+    },
+    var.common_tags
+    )
+}
+
+##################################################################################
+# Route Table Associations
+##################################################################################
+resource "aws_route_table_association" "public_subnets_association" {
+  for_each = {for subnet in aws_subnet.public : subnet.id => subnet}
+  subnet_id      = each.key
+  route_table_id = aws_route_table.public.id
+}
+resource "aws_route_table_association" "private_subnets_association" {
+  for_each = {for subnet in aws_subnet.private : subnet.id => subnet}
+  subnet_id      = each.key
+  route_table_id = aws_route_table.private.id
+}
+resource "aws_route_table_association" "db_subnets_association" {
+  for_each = {for subnet in aws_subnet.db : subnet.id => subnet}
+  subnet_id      = each.key
+  route_table_id = aws_route_table.db.id
+}
+
+###################################################################################
+# EIP, NAT Gateway
+###################################################################################
+resource "aws_eip" "eks" {
+  count = var.enable_nat ? 1 : 0
+  domain   = "vpc"
+}
+resource "aws_nat_gateway" "example" {
+  count = var.enable_nat ? 1 : 0
+  allocation_id = aws_eip.eks[0].id
+  subnet_id     = aws_subnet.public[0].id
+
+  tags = merge(
+    {
+      Name = "${local.name}-NAT"
+    },
+    var.common_tags
+    )
+  depends_on = [aws_internet_gateway.gw]
+}
+##################################################################################
+# Routes
+##################################################################################
+resource "aws_route" "public_all_traffic" {
+  route_table_id            = aws_route_table.public.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id                = aws_internet_gateway.gw.id
+}
+resource "aws_route" "private_nat_internet" {
+  count = var.enable_nat ? 1 : 0
+  route_table_id            = aws_route_table.private.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.example[0].id
+}
+resource "aws_route" "db_nat_internet" {
+  count = var.enable_nat ? 1 : 0
+  route_table_id            = aws_route_table.db.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.example[0].id
+}
