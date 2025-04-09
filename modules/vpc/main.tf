@@ -117,19 +117,21 @@ resource "aws_route_table" "db" {
 ##################################################################################
 # Route Table Associations
 ##################################################################################
-resource "aws_route_table_association" "public_subnets_association" {
-  for_each = {for subnet in aws_subnet.public : subnet.id => subnet}
-  subnet_id      = each.key
+resource "aws_route_table_association" "public" {
+  count          = length(aws_subnet.public)
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
-resource "aws_route_table_association" "private_subnets_association" {
-  for_each = {for subnet in aws_subnet.private : subnet.id => subnet}
-  subnet_id      = each.key
+
+resource "aws_route_table_association" "private" {
+  count          = length(aws_subnet.public)
+  subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
-resource "aws_route_table_association" "db_subnets_association" {
-  for_each = {for subnet in aws_subnet.db : subnet.id => subnet}
-  subnet_id      = each.key
+
+resource "aws_route_table_association" "db" {
+  count          = length(aws_subnet.db)
+  subnet_id      = aws_subnet.db[count.index].id
   route_table_id = aws_route_table.db.id
 }
 
@@ -173,3 +175,11 @@ resource "aws_route" "db_nat_internet" {
   destination_cidr_block    = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.example[0].id
 }
+
+##################################################################################
+# EC2 - Endpoints
+##################################################################################
+# resource "aws_ec2_instance_connect_endpoint" "example" { 
+#   for_each = var.enable_instance_connect ? { for subnet in concat(aws_subnet.db, aws_subnet.private) : subnet.id => subnet } : {}
+#   subnet_id = each.key
+# }

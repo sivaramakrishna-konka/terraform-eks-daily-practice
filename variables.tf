@@ -61,3 +61,8 @@ variable "enable_nat" {
   type    = bool
   default = true
 }
+# variable "enable_instance_connect" {
+#   description = "Enable EC2 Instance Connect Endpoint"
+#   type        = bool
+#   default     = true
+# }
